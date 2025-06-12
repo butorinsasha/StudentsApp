@@ -1,21 +1,23 @@
 package tests
 
 import android.content.Context
+import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
+import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.kaspersky.components.alluresupport.interceptors.step.AllureMapperStepInterceptor
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.params.FlakySafetyParams
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
+import ru.tinkoff.favouritepersons.presentation.activities.MainActivity
 import ru.tinkoff.favouritepersons.room.PersonDataBase
+import rules.PreferenceRule
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 
-/**
- * @author a.b.butorin
- */
 abstract class BaseTest : TestCase(
     kaspressoBuilder = Kaspresso.Builder.simple(
         customize = {
@@ -24,6 +26,15 @@ abstract class BaseTest : TestCase(
     ).apply {
         stepWatcherInterceptors.addAll(listOf(AllureMapperStepInterceptor()))
     }) {
+
+    @get:Rule(order = 1)
+    val prefs = PreferenceRule(true)
+
+    @get:Rule(order = 2)
+    val mockRule = WireMockRule(5000)
+
+    @get:Rule(order = 3)
+    val activityScenarioRule = activityScenarioRule<MainActivity>()
 
     private lateinit var db: PersonDataBase
 
